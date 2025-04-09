@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "BUsf7nRj2BUO3G3FG1tzXV/yojY8Hspeec8+015zyRI=",
+  "Source": "MesApiServer",
+  "BasePath": "_content/MesApiServer",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
