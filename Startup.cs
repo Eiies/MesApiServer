@@ -5,7 +5,6 @@ namespace MesApiServer;
 
 public class Startup(IConfiguration configuration){
     public IConfiguration Configuration{ get; } = configuration;
-
     public void ConfigureServices(IServiceCollection services){
         services.AddControllers();
         services.AddHttpClient<MesService>();
@@ -16,6 +15,7 @@ public class Startup(IConfiguration configuration){
                 Version = "v1"
             });
         });
+        
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env){
@@ -25,7 +25,7 @@ public class Startup(IConfiguration configuration){
             app.UseSwagger();
             app.UseSwaggerUI(c => {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "MES API v1");
-                c.RoutePrefix = "docs"; 
+                c.RoutePrefix = "docs";
             });
         }
 
