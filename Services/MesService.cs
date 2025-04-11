@@ -1,15 +1,9 @@
-﻿using System.Text;
-using System.Text.Json;
-using MesApiServer.Models;
-
-namespace MesApiServer.Services;
+﻿namespace MesApiServer.Services;
 
 public class MesService(HttpClient httpClient){
-    public async Task<bool> SendToMesAsync(WorkOrderDto dto){
-        var json = JsonSerializer.Serialize(dto);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var response = await httpClient.PostAsync("http://mes-server/api/receive", content);
-        return response.IsSuccessStatusCode;
+    public async Task<string> GetExternalDataAsync(){
+        var response = await httpClient.GetAsync("https://api.example.com/data");
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsStringAsync();
     }
 }

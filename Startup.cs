@@ -1,37 +1,1 @@
-﻿using MesApiServer.Services;
-using Microsoft.OpenApi.Models;
-
-namespace MesApiServer;
-
-public class Startup(IConfiguration configuration){
-    public IConfiguration Configuration{ get; } = configuration;
-    public void ConfigureServices(IServiceCollection services){
-        services.AddControllers();
-        services.AddHttpClient<MesService>();
-
-        services.AddSwaggerGen(options => {
-            options.SwaggerDoc("v1", new OpenApiInfo{
-                Title = "MES API",
-                Version = "v1"
-            });
-        });
-        
-    }
-
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env){
-        if (env.IsDevelopment()){
-            app.UseDeveloperExceptionPage();
-
-            app.UseSwagger();
-            app.UseSwaggerUI(c => {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "MES API v1");
-                c.RoutePrefix = "docs";
-            });
-        }
-
-        app.UseHttpsRedirection();
-        app.UseRouting();
-        app.UseAuthorization();
-        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-    }
-}
+﻿using MesApiServer.Services;using Microsoft.OpenApi.Models;namespace MesApiServer;public class Startup(IConfiguration configuration){    private IConfiguration Configuration{ get; } = configuration;    public void ConfigureServices(IServiceCollection services){        // 注册数据库上下文（扩展方法已封装注册逻辑）        services.AddMySqlDatabase(Configuration);        // 注册控制器        services.AddControllers();        // 注册 MesService 服务        services.AddHttpClient<MesService>();        // 注册 Swagger 生成器        services.AddSwaggerGen(options => {            options.SwaggerDoc("v1", new OpenApiInfo{                Title = "MES API",                Version = "v1"            });        });    }    public void Configure(IApplicationBuilder app, IWebHostEnvironment env){        if (env.IsDevelopment()){            app.UseDeveloperExceptionPage();            app.UseSwagger();            app.UseSwaggerUI(c => {                c.SwaggerEndpoint("/swagger/v1/swagger.json", "MES API v1");                c.RoutePrefix = "docs";            });        }        app.UseHttpsRedirection();        app.UseRouting();        app.UseAuthorization();        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });    }}
