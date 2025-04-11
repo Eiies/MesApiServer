@@ -1,4 +1,17 @@
-﻿using MesApiServer.Adapters;using MesApiServer.Repositories;using MesApiServer.Services;using Microsoft.OpenApi.Models;using Serilog;using Serilog.Settings.Configuration;namespace MesApiServer;public class Startup(IConfiguration configuration) {    private IConfiguration Configuration { get; } = configuration;    public void ConfigureServices(IServiceCollection services) {
+﻿using MesApiServer.Adapters;
+using MesApiServer.Repositories;
+using MesApiServer.Services;
+using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Settings.Configuration;
+
+namespace MesApiServer;
+
+public class Startup(IConfiguration configuration) {
+    private IConfiguration Configuration { get; } = configuration;
+
+
+    public void ConfigureServices(IServiceCollection services) {
         // 注册数据库上下文（扩展方法已封装注册逻辑）
         services.AddMySqlDatabase(Configuration);
 
@@ -22,7 +35,19 @@
 
         // 鉴权
         // services.AddAuthentication(Configuration);
-    }    public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {        if(env.IsDevelopment()) {            app.UseDeveloperExceptionPage();            app.UseSwagger();            app.UseSwaggerUI(c => {                c.SwaggerEndpoint("/swagger/v1/swagger.json", "MES API v1");                c.RoutePrefix = "docs";            });        }
+    }
+
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
+        if(env.IsDevelopment()) {
+            app.UseDeveloperExceptionPage();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "MES API v1");
+                c.RoutePrefix = "docs";
+            });
+        }
 
         //// 初始化 Serilog
        Log.Logger = new LoggerConfiguration()
@@ -40,10 +65,16 @@
                 throw;
             }
         });
-        app.UseHttpsRedirection();        app.UseRouting();
+
+
+        app.UseHttpsRedirection();
+        app.UseRouting();
 
         // 如果未来启用鉴权，则取消注释下面两行
         // app.UseAuthentication();
         // app.UseAuthorization();
 
-        app.UseAuthorization();        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });    }}
+        app.UseAuthorization();
+        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+    }
+}
