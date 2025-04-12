@@ -1,6 +1,8 @@
 ﻿using MesApiServer.Adapters;
+using MesApiServer.Data;
 using MesApiServer.Repositories;
 using MesApiServer.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Settings.Configuration;
@@ -39,42 +41,55 @@ public class Startup(IConfiguration configuration) {
 
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
-        if(env.IsDevelopment()) {
-            app.UseDeveloperExceptionPage();
 
-            app.UseSwagger();
-            app.UseSwaggerUI(c => {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "MES API v1");
-                c.RoutePrefix = "docs";
-            });
-        }
-
-        //// 初始化 Serilog
-       Log.Logger = new LoggerConfiguration()
-           .ReadFrom.Configuration(Configuration)
-           .Enrich.FromLogContext()
-           .CreateLogger();
-
-
-        // 全局异常捕获并记录
-        app.Use(async (context, next) => {
+        // 尝试连接数据库并自动迁移（创建表）
+        using(var scope = app.ApplicationServices.CreateScope()) {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             try {
-                await next();
+                db.Database.Migrate(); // 自动建表
+                Log.Information("数据库连接成功，已检查并迁移数据表结构。");
             } catch(Exception ex) {
-                Log.Error(ex, "Unhandled exception");
-                throw;
+                Log.Fatal(ex, "数据库初始化失败！");
+                Environment.Exit(1);
             }
-        });
+
+            if(env.IsDevelopment()) {
+                app.UseDeveloperExceptionPage();
+
+                app.UseSwagger();
+                app.UseSwaggerUI(c => {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "MES API v1");
+                    c.RoutePrefix = "docs";
+                });
+            }
+
+            //// 初始化 Serilog
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(Configuration)
+                .Enrich.FromLogContext()
+                .CreateLogger();
 
 
-        app.UseHttpsRedirection();
-        app.UseRouting();
+            // 全局异常捕获并记录
+            app.Use(async (context, next) => {
+                try {
+                    await next();
+                } catch(Exception ex) {
+                    Log.Error(ex, "Unhandled exception");
+                    throw;
+                }
+            });
 
-        // 如果未来启用鉴权，则取消注释下面两行
-        // app.UseAuthentication();
-        // app.UseAuthorization();
 
-        app.UseAuthorization();
-        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseHttpsRedirection();
+            app.UseRouting();
+
+            // 如果未来启用鉴权，则取消注释下面两行
+            // app.UseAuthentication();
+            // app.UseAuthorization();
+
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+        }
     }
 }
