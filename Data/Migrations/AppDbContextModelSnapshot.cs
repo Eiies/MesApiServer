@@ -30,6 +30,9 @@ namespace MesApiServer.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("DeviceId")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -56,7 +59,14 @@ namespace MesApiServer.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Operator")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -76,12 +86,19 @@ namespace MesApiServer.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("DeviceId")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Operator")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Result")
                         .IsRequired()
@@ -100,7 +117,14 @@ namespace MesApiServer.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Operator")
                         .IsRequired()
                         .HasColumnType("longtext");
 

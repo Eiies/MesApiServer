@@ -4,57 +4,52 @@ using MesApiServer.Models;
 using MesApiServer.Repositories;
 
 namespace MesApiServer.Services;
-public class DeviceService(IDeviceRepository deviceRepository, IMesAdapter mesAdapter, ILogger<DeviceService> logger)
-        :IDeviceService {
+
+public class DeviceService(
+        IDeviceRepository deviceRepository,
+        IMesAdapter mesAdapter
+    ) :IDeviceService {
+
     public void HandleAliveCheck(AliveCheckRequest request) {
-        // 数据校验：确保 DeviceId 不为空，Timestamp 合理
-        if(string.IsNullOrWhiteSpace(request.DeviceId)) {
-            logger.LogWarning("收到无效的心跳请求：DeviceId 为空。");
-            throw new ArgumentException("DeviceId 为必填项");
-        }
-        if(request.Timestamp == default) {
-            logger.LogWarning("收到无效的心跳请求：Timestamp 无效。");
+        if(string.IsNullOrWhiteSpace(request.DeviceId))
+            throw new ArgumentException("DeviceId 不能为空");
+        if(request.Timestamp == default)
             throw new ArgumentException("Timestamp 无效");
-        }
 
-        // 数据标准化：例如统一设备编号格式
-        string standardizedDeviceId = request.DeviceId.Trim().ToUpperInvariant();
-        request.DeviceId = standardizedDeviceId;
-
-        logger.LogDebug($"标准化后的设备编号：{standardizedDeviceId}");
-
-        // 映射到数据库实体（Device 实体）
-        var deviceEntity = new Device {
-            DeviceId = standardizedDeviceId,
+        request.DeviceId = request.DeviceId.Trim().ToUpperInvariant();
+        var entity = new Device {
+            DeviceId = request.DeviceId,
             LastHeartbeat = request.Timestamp
         };
-
-        // 保存设备心跳数据到数据库（Repository 层处理增/改逻辑）
-        deviceRepository.SaveHeartbeat(deviceEntity);
-
-        // 将数据转发给 MES 系统（通过适配器实现松耦合）
+        deviceRepository.SaveHeartbeat(entity);
         mesAdapter.SendAliveNotification(request);
     }
 
     public void HandleTrackIn(TrackInRequest request) {
-        // 发送消息到MES
-        mesAdapter.SendMessage(
-            $"Device {request.DeviceId} tracked in product {request.ProductCode} at {request.ProductCode}");
+        if(string.IsNullOrWhiteSpace(request.DeviceId) || string.IsNullOrWhiteSpace(request.ProductCode))
+            throw new ArgumentException("DeviceId 和 ProductCode 是必填项");
+
+        request.DeviceId = request.DeviceId.Trim().ToUpperInvariant();
         deviceRepository.SaveTrackIn(request);
+        mesAdapter.SendMessage($"设备 {request.DeviceId} 入库产品 {request.ProductCode}，操作员：{request.Operator}，时间：{request.StartTime}");
     }
 
     public void HandleEQPConfirm(EQP2DConfirmRequest request) {
-        // 发送消息到MES
-        mesAdapter.SendMessage(
-            $"Device {request.DeviceId} confirmed barcode {request.Barcode} at {request.Barcode}");
+        if(string.IsNullOrWhiteSpace(request.DeviceId) || string.IsNullOrWhiteSpace(request.Barcode))
+            throw new ArgumentException("DeviceId 和 Barcode 是必填项");
+
+        request.DeviceId = request.DeviceId.Trim().ToUpperInvariant();
         deviceRepository.SaveEQPConfirm(request);
+        mesAdapter.SendMessage($"设备 {request.DeviceId} 扫描确认条码 {request.Barcode}，操作员：{request.Operator}，时间：{request.ScanTime}");
     }
 
     public void HandleProcessEnd(ProcessEndRequest request) {
-        // 发送消息到MES
-        mesAdapter.SendMessage(
-            $"Device {request.DeviceId} process ended with result {request.Result} at {request.Result}");
-        deviceRepository.SaveProcessEnd(request);
-    }
+        if(string.IsNullOrWhiteSpace(request.DeviceId))
+            throw new ArgumentException("DeviceId 是必填项");
 
+        request.DeviceId = request.DeviceId.Trim().ToUpperInvariant();
+        deviceRepository.SaveProcessEnd(request);
+        mesAdapter.SendMessage($"设备 {request.DeviceId} 完成工序，结果：{request.Result}，时间：{request.EndTime}");
+    }
 }
+

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MesApiServer.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250413113844_AddLogTables")]
-    partial class AddLogTables
+    [Migration("20250413123528_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,9 @@ namespace MesApiServer.Data.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("DeviceId")
                         .IsRequired()
@@ -59,7 +62,14 @@ namespace MesApiServer.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Operator")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -79,12 +89,19 @@ namespace MesApiServer.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("DeviceId")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Operator")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Result")
                         .IsRequired()
@@ -103,7 +120,14 @@ namespace MesApiServer.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Operator")
                         .IsRequired()
                         .HasColumnType("longtext");
 

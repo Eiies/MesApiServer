@@ -19,7 +19,7 @@ public class EquipmentController(IDeviceService deviceService, ILogger<Equipment
             deviceService.HandleAliveCheck(request);
             return Ok(new { message = "Alive check processed" });
         } catch(Exception ex) {
-            logger.LogError(ex,"处理心跳请求时发生错误");
+            logger.LogError(ex, "处理心跳请求时发生错误");
             return BadRequest(new { message = "Error processing alive check" });
         }
     }
@@ -32,10 +32,10 @@ public class EquipmentController(IDeviceService deviceService, ILogger<Equipment
     public IActionResult TrackInRequest([FromBody] TrackInRequest request) {
         try {
             deviceService.HandleTrackIn(request);
-            return Ok(new ApiResponse<object>(true, "TrackIn processed"));
+            return Ok(new ApiResponse<object>(true, "上级完成"));
         } catch(Exception ex) {
             logger.LogError(ex, "处理上机请求时发生错误");
-            return BadRequest(new ApiResponse<object>(false, "Error processing track in request"));
+            return BadRequest(new ApiResponse<object>(false, "处理上机请求时发生错误"));
         }
     }
 

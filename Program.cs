@@ -1,3 +1,4 @@
+using DotNetEnv;
 using MesApiServer.Adapters;
 using MesApiServer.Data;
 using MesApiServer.Repositories;
@@ -9,7 +10,6 @@ using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
 using System.Text;
-using DotNetEnv;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

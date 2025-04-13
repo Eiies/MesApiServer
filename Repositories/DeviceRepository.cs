@@ -8,7 +8,8 @@ public class DeviceRepository(AppDbContext context, ILogger<DeviceRepository> lo
         var log = new EQPConfirmLog {
             DeviceId = request.DeviceId,
             Barcode = request.Barcode,
-            ScanTime = request.ScanTime
+            ScanTime = request.ScanTime,
+            Operator = request.Operator
         };
         context.EQPConfirmLogs.Add(log);
         context.SaveChanges();
@@ -18,14 +19,12 @@ public class DeviceRepository(AppDbContext context, ILogger<DeviceRepository> lo
     public void SaveHeartbeat(Device device) {
         var existingDevice = context.Devices.FirstOrDefault(d => d.DeviceId == device.DeviceId);
         if(existingDevice == null) {
-            // 如果设备不存在，则添加新设备
             context.Devices.Add(device);
-            logger.LogInformation("【心跳】设备 {DeviceId} 新设备已添加，时间：{Timestamp}", device.DeviceId, device.LastHeartbeat);
+            logger.LogInformation("【心跳】新增设备 {DeviceId}，时间：{Timestamp}", device.DeviceId, device.LastHeartbeat);
         } else {
-            // 如果设备存在，则更新心跳时间
             existingDevice.LastHeartbeat = device.LastHeartbeat;
             context.Devices.Update(existingDevice);
-            logger.LogInformation("【心跳】设备 {DeviceId} 心跳时间已更新，时间：{Timestamp}", device.DeviceId, device.LastHeartbeat);
+            logger.LogInformation("【心跳】更新设备 {DeviceId}，时间：{Timestamp}", device.DeviceId, device.LastHeartbeat);
         }
         context.SaveChanges();
     }
@@ -34,7 +33,9 @@ public class DeviceRepository(AppDbContext context, ILogger<DeviceRepository> lo
         var log = new ProcessEndLog {
             DeviceId = request.DeviceId,
             Result = request.Result,
-            EndTime = request.EndTime
+            EndTime = request.EndTime,
+            Operator = request.Operator
+
         };
         context.ProcessEndLogs.Add(log);
         context.SaveChanges();
@@ -45,7 +46,9 @@ public class DeviceRepository(AppDbContext context, ILogger<DeviceRepository> lo
         var log = new TrackInLog {
             DeviceId = request.DeviceId,
             ProductCode = request.ProductCode,
-            StartTime = request.StartTime
+            StartTime = request.StartTime,
+            CreatedAt = DateTime.UtcNow,
+            Operator = request.Operator
         };
         context.TrackInLogs.Add(log);
         context.SaveChanges();
