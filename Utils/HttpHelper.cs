@@ -10,5 +10,4 @@ public class HttpHelper {
         HttpResponseMessage response = await httpClient.PostAsync(url, content);
         return await response.Content.ReadAsStringAsync();
     }
-
 }

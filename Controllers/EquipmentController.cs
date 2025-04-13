@@ -1,34 +1,71 @@
 ﻿using MesApiServer.Models;
 using MesApiServer.Services;
+using MesApiServer.Utils;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MesApiServer.Controllers;
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class EquipmentController(IDeviceService deviceService, ILogger<EquipmentController> logger)
         :ControllerBase {
+
+    /// <summary>
+    /// 设备心跳接口
+    /// POST: /api/Equipment/AliveCheck
+    /// </summary>
     [HttpPost("AliveCheck")]
     public IActionResult AliveCheck([FromBody] AliveCheckRequest request) {
-        deviceService.HandleAliveCheck(request);
-        logger.LogInformation("心跳指令收到");
-        return Ok(new { message = "心跳指令收到" });
+        try {
+            deviceService.HandleAliveCheck(request);
+            return Ok(new { message = "Alive check processed" });
+        } catch(Exception ex) {
+            logger.LogError(ex,"处理心跳请求时发生错误");
+            return BadRequest(new { message = "Error processing alive check" });
+        }
     }
 
+    /// <summary>
+    /// 上机请求接口
+    /// POST: /api/Equipment/TrackInRequest
+    /// </summary>
     [HttpPost("TrackInRequest")]
     public IActionResult TrackInRequest([FromBody] TrackInRequest request) {
-        deviceService.HandleTrackIn(request);
-        return Ok(new { message = "TrackIn processed" });
+        try {
+            deviceService.HandleTrackIn(request);
+            return Ok(new ApiResponse<object>(true, "TrackIn processed"));
+        } catch(Exception ex) {
+            logger.LogError(ex, "处理上机请求时发生错误");
+            return BadRequest(new ApiResponse<object>(false, "Error processing track in request"));
+        }
     }
 
+    /// <summary>
+    /// 板件确认接口
+    /// POST: /api/Equipment/EQP2DComfirm
+    /// </summary>
     [HttpPost("EQP2DComfirm")]
     public IActionResult EQP2DComfirm([FromBody] EQP2DConfirmRequest request) {
-        deviceService.HandleEQPConfirm(request);
-        return Ok(new { message = "2D confirm received" });
+        try {
+            deviceService.HandleEQPConfirm(request);
+            return Ok(new ApiResponse<object>(true, "2D confirm received"));
+        } catch(Exception ex) {
+            logger.LogError(ex, "处理板件确认请求时发生错误");
+            return BadRequest(new ApiResponse<object>(false, "Error processing 2D confirm request"));
+        }
     }
 
+    /// <summary>
+    /// 处理结束接口
+    /// POST: /api/Equipment/ProcessEnd
+    /// </summary>
     [HttpPost("ProcessEnd")]
     public IActionResult ProcessEnd([FromBody] ProcessEndRequest request) {
-        deviceService.HandleProcessEnd(request);
-        return Ok(new { message = "Process end recorded" });
+        try {
+            deviceService.HandleProcessEnd(request);
+            return Ok(new ApiResponse<object>(true, "Process end recorded"));
+        } catch(Exception ex) {
+            logger.LogError(ex, "处理流程结束请求时发生错误");
+            return BadRequest(new ApiResponse<object>(false, "Error processing process end request"));
+        }
     }
 }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MesApiServer.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250413085943_InitialCreate")]
+    [Migration("20250413104056_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -35,7 +35,9 @@ namespace MesApiServer.Data.Migrations
 
                     b.Property<string>("DeviceId")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<DateTime>("LastHeartbeat")
                         .HasColumnType("datetime(6)");
