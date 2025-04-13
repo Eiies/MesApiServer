@@ -6,5 +6,5 @@ public interface IDeviceRepository {
     void SaveHeartbeat(AliveCheckRequest request);
     void SaveProcessEnd(ProcessEndRequest request);
     void SaveTrackIn(TrackInRequest request);
-}
 
+}

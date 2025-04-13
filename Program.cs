@@ -9,12 +9,16 @@ using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
 using System.Text;
+using DotNetEnv;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// 加载 .env 文件
+Env.Load();
 
 // ==================== 日志配置 ====================
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
     .ReadFrom.Configuration(builder.Configuration)
@@ -23,22 +27,21 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // ==================== 数据库配置 ====================
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("缺少数据库连接字符串配置");
+var connectionString = $"Server={Env.GetString("MYSQL_HOST")};Port={Env.GetString("MYSQL_PORT")};Database={Env.GetString("MYSQL_DATABASE")};User={Env.GetString("MYSQL_USER")};Password={Env.GetString("MYSQL_PASSWORD")};";
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(
+builder.Services.AddDbContext<AppDbContext>(opt =>
+    opt.UseMySql(
         connectionString,
         ServerVersion.AutoDetect(connectionString),
         mysql => {
             mysql.EnableRetryOnFailure(
-                maxRetryCount: 5,
-                maxRetryDelay: TimeSpan.FromSeconds(30),
-                errorNumbersToAdd: null);
+                5,
+                TimeSpan.FromSeconds(30),
+                null);
         }));
 
 // ==================== 认证配置 ====================
-var jwtSettings = builder.Configuration.GetSection("Jwt");
+IConfigurationSection jwtSettings = builder.Configuration.GetSection("Jwt");
 if(jwtSettings.Exists()) {
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options => {
@@ -66,16 +69,21 @@ builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 
 // ==================== 应用构建 ====================
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // ==================== 数据库迁移 ====================
-using(var scope = app.Services.CreateScope()) {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+using(IServiceScope scope = app.Services.CreateScope()) {
+    AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     try {
         db.Database.Migrate();
         Log.Information("数据库架构已更新");
+    } catch(DbUpdateException ex) {
+        Log.Fatal(ex, "数据库迁移失败：数据库更新异常");
+        // 处理数据库更新异常
+        throw;
     } catch(Exception ex) {
-        Log.Fatal(ex, "数据库迁移失败");
+        Log.Fatal(ex, "数据库迁移失败：未知异常");
+        // 处理其他异常
         throw;
     }
 }
@@ -96,7 +104,6 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 if(jwtSettings.Exists()) {
-
     // TODO: 需要添加身份验证中间件，暂不启用
 
     //app.UseAuthentication();

@@ -8,4 +8,3 @@ public interface IDeviceService {
     void HandleProcessEnd(ProcessEndRequest request);
 
 }
-

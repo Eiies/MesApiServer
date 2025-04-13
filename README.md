@@ -1,9 +1,12 @@
 # MesApiServer
 
+
+**执行数据库迁移** 
+```bash
+dotnet ef migrations add InitialCreate -o Data/Migrations
 ```
-dotnet add package Microsoft.EntityFrameworkCore.Design
 
-dotnet ef migrations add InitialCreate
+**更新数据库**
+```bash
 dotnet ef database update
-
 ```

@@ -3,11 +3,10 @@ using MesApiServer.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MesApiServer.Controllers;
-
 [ApiController]
 [Route("[controller]")]
-public class EquipmentController(IDeviceService deviceService, ILogger<EquipmentController> logger) :ControllerBase {
-
+public class EquipmentController(IDeviceService deviceService, ILogger<EquipmentController> logger)
+        :ControllerBase {
     [HttpPost("AliveCheck")]
     public IActionResult AliveCheck([FromBody] AliveCheckRequest request) {
         deviceService.HandleAliveCheck(request);
