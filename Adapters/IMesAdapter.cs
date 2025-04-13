@@ -1,6 +1,5 @@
-﻿using MesApiServer.Models;
-
-namespace MesApiServer.Adapters;
+﻿namespace MesApiServer.Adapters;
 public interface IMesAdapter {
-    Task SendDataToMesAsync(DeviceDto data);
+    // 发送消息到MES
+    void SendMessage(string message);
 }

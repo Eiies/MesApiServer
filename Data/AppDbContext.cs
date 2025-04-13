@@ -1,3 +1,8 @@
-﻿using MesApiServer.Data.Entities;using MesApiServer.Models;using Microsoft.EntityFrameworkCore;namespace MesApiServer.Data;public class AppDbContext(DbContextOptions<AppDbContext> options) :DbContext(options) {    public DbSet<DeviceDto> DeviceDto { get; set; }
+﻿using MesApiServer.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
-    public DbSet<Device> Device { get; set; }    protected override void OnModelCreating(ModelBuilder modelBuilder) {        modelBuilder.Entity<DeviceDto>(entity => {            entity.HasKey(e => e.Id);            entity.Property(e => e.DeviceId).IsRequired().HasMaxLength(50);            entity.Property(e => e.DataPayload).IsRequired();            entity.Property(e => e.Timestamp).HasDefaultValueSql("CURRENT_TIMESTAMP");        });    }}
+namespace MesApiServer.Data;
+
+public class AppDbContext(DbContextOptions<AppDbContext> opt) :DbContext(opt) {
+    public DbSet<Device> Device { get; set; }
+}
