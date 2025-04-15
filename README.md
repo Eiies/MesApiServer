@@ -15,7 +15,8 @@ MesApiServer/
 │   ├── IDeviceRepository.cs         // 数据访问接口
 │   └── DeviceRepository.cs          // 数据访问实现
 ├── Adapters/
-│   └── IMesAdapter.cs               // MES系统接口适配器接口及其实现（例如 MesAdapter）
+│   └── IMesAdapter.cs               // MES系统接口适配器接口及其实现（例如 
+MesAdapter）
 ├── Services/
 │   ├── IDeviceService.cs            // 业务服务接口
 │   └── DeviceService.cs             // 业务服务实现
