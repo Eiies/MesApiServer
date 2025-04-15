@@ -1,6 +1,6 @@
 # MesApiServer
 
-``txt
+```txt
 MesApiServer/
 ├── Controllers/
 │   └── EquipmentController.cs     // 接口控制器层，仅负责解析请求、调用业务服务
