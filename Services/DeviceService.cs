@@ -11,27 +11,22 @@ public class DeviceService(
     ) :IDeviceService {
 
     public void HandleAliveCheck(AliveCheckRequest request) {
-        if(string.IsNullOrWhiteSpace(request.DeviceId))
-            throw new ArgumentException("DeviceId 不能为空");
-        if(request.Timestamp == default)
-            throw new ArgumentException("Timestamp 无效");
-
-        request.DeviceId = request.DeviceId.Trim().ToUpperInvariant();
+        var eqpID = request.Context.EQPID.Trim().ToUpperInvariant(); // 处理 EQPID 字段
         var entity = new Device {
-            DeviceId = request.DeviceId,
-            LastHeartbeat = request.Timestamp
+            DeviceId = eqpID,
+            LastHeartbeat = request.StartTime,
         };
         deviceRepository.SaveHeartbeat(entity);
         mesAdapter.SendAliveNotification(request);
     }
 
     public void HandleTrackIn(TrackInRequest request) {
-        if(string.IsNullOrWhiteSpace(request.DeviceId) || string.IsNullOrWhiteSpace(request.ProductCode))
-            throw new ArgumentException("DeviceId 和 ProductCode 是必填项");
+        if(string.IsNullOrWhiteSpace(request.Content.EQPID) || string.IsNullOrWhiteSpace(request.Content.LotID))
+            throw new ArgumentException("EQPID 和 LotID 是必填项");
 
-        request.DeviceId = request.DeviceId.Trim().ToUpperInvariant();
+        request.Content.EQPID = request.Content.EQPID.Trim().ToUpperInvariant();
         deviceRepository.SaveTrackIn(request);
-        mesAdapter.SendMessage($"设备 {request.DeviceId} 入库产品 {request.ProductCode}，操作员：{request.Operator}，时间：{request.StartTime}");
+        mesAdapter.SendMessage($"设备 {request.Content.EQPID} 入库产品 {request.Content.LotID}");
     }
 
     public void HandleEQPConfirm(EQP2DConfirmRequest request) {
@@ -40,7 +35,7 @@ public class DeviceService(
 
         request.DeviceId = request.DeviceId.Trim().ToUpperInvariant();
         deviceRepository.SaveEQPConfirm(request);
-        mesAdapter.SendMessage($"设备 {request.DeviceId} 扫描确认条码 {request.Barcode}，操作员：{request.Operator}，时间：{request.ScanTime}");
+        mesAdapter.SendMessage($"设备 {request.DeviceId} 扫描确认条码 {request.Barcode}，时间：{request.ScanTime}");
     }
 
     public void HandleProcessEnd(ProcessEndRequest request) {

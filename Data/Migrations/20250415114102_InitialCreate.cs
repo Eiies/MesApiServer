@@ -21,7 +21,7 @@ namespace MesApiServer.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    DeviceId = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false)
+                    DeviceId = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     LastHeartbeat = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
@@ -33,13 +33,14 @@ namespace MesApiServer.Data.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "EQPConfirmLogs",
+                name: "EQPConfirm",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    DeviceId = table.Column<string>(type: "longtext", nullable: false)
+                    EQPID = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    DeviceId = table.Column<int>(type: "int", nullable: true),
                     Barcode = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ScanTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -49,18 +50,24 @@ namespace MesApiServer.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EQPConfirmLogs", x => x.Id);
+                    table.PrimaryKey("PK_EQPConfirm", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EQPConfirm_Devices_DeviceId",
+                        column: x => x.DeviceId,
+                        principalTable: "Devices",
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "ProcessEndLogs",
+                name: "ProcessEnd",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    DeviceId = table.Column<string>(type: "longtext", nullable: false)
+                    EQPID = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    DeviceId = table.Column<int>(type: "int", nullable: true),
                     Result = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     EndTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -70,46 +77,73 @@ namespace MesApiServer.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProcessEndLogs", x => x.Id);
+                    table.PrimaryKey("PK_ProcessEnd", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProcessEnd_Devices_DeviceId",
+                        column: x => x.DeviceId,
+                        principalTable: "Devices",
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "TrackInLogs",
+                name: "TrackIn",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    DeviceId = table.Column<string>(type: "longtext", nullable: false)
+                    EQPID = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ProductCode = table.Column<string>(type: "longtext", nullable: false)
+                    LotID = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    StartTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Operator = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4")
+                    DeviceId = table.Column<int>(type: "int", nullable: true),
+                    CarrierID = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    EmployeeID = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TrackInLogs", x => x.Id);
+                    table.PrimaryKey("PK_TrackIn", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TrackIn_Devices_DeviceId",
+                        column: x => x.DeviceId,
+                        principalTable: "Devices",
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EQPConfirm_DeviceId",
+                table: "EQPConfirm",
+                column: "DeviceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProcessEnd_DeviceId",
+                table: "ProcessEnd",
+                column: "DeviceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TrackIn_DeviceId",
+                table: "TrackIn",
+                column: "DeviceId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "EQPConfirm");
+
+            migrationBuilder.DropTable(
+                name: "ProcessEnd");
+
+            migrationBuilder.DropTable(
+                name: "TrackIn");
+
+            migrationBuilder.DropTable(
                 name: "Devices");
-
-            migrationBuilder.DropTable(
-                name: "EQPConfirmLogs");
-
-            migrationBuilder.DropTable(
-                name: "ProcessEndLogs");
-
-            migrationBuilder.DropTable(
-                name: "TrackInLogs");
         }
     }
 }

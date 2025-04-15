@@ -25,6 +25,12 @@ MesApiServer/
 ```
 
 
+```bash
+Add-Migration InitialCreate -o Data/Migrations
+
+Update-Database
+```
+
 **执行数据库迁移** 
 ```bash
 dotnet ef migrations add InitialCreate -o Data/Migrations

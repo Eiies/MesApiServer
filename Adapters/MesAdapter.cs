@@ -8,8 +8,8 @@ public class MesAdapter(ILogger<MesAdapter> logger) :IMesAdapter {
 
         var message = JsonSerializer.Serialize(new {
             Type = "Heartbeat",
-            request.DeviceId,
-            request.Timestamp
+            request.Form,
+            request.Context.EQPID
         });
         logger.LogDebug("[MES] 心跳通知发送：{Message}", message);
     }
@@ -23,10 +23,10 @@ public class MesAdapter(ILogger<MesAdapter> logger) :IMesAdapter {
     public void SendTrackInNotification(TrackInRequest request) {
         var message = JsonSerializer.Serialize(new {
             Type = "TrackIn",
-            DeviceId = request.DeviceId,
-            ProductCode = request.ProductCode,
-            Operator = request.Operator,
-            StartTime = request.StartTime
+            request.Content.EQPID,
+            request.Content.CarrierID,
+            request.Content.EmployeeID,
+            request.Content.LotID,
         });
         logger.LogInformation("[MES] 入库通知发送：{Message}", message);
     }
@@ -34,9 +34,9 @@ public class MesAdapter(ILogger<MesAdapter> logger) :IMesAdapter {
     public void SendEQPConfirmNotification(EQP2DConfirmRequest request) {
         var message = JsonSerializer.Serialize(new {
             Type = "EQP2DConfirm",
-            DeviceId = request.DeviceId,
-            Barcode = request.Barcode,
-            ScanTime = request.ScanTime
+            request.DeviceId,
+            request.Barcode,
+            request.ScanTime
         });
         logger.LogInformation("[MES] 2D确认通知发送：{Message}", message);
     }
@@ -44,11 +44,10 @@ public class MesAdapter(ILogger<MesAdapter> logger) :IMesAdapter {
     public void SendProcessEndNotification(ProcessEndRequest request) {
         var message = JsonSerializer.Serialize(new {
             Type = "ProcessEnd",
-            DeviceId = request.DeviceId,
-            Result = request.Result,
-            EndTime = request.EndTime
+            request.DeviceId,
+            request.Result,
+            request.EndTime
         });
         logger.LogInformation("[MES] 工序结束通知发送：{Message}", message);
     }
-
 }

@@ -1,8 +1,16 @@
 ﻿namespace MesApiServer.Models;
 
 public class AliveCheckRequest {
-    public required string DeviceId { get; set; }
-    public DateTime Timestamp { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public string Form { get; set; } = "AliveCheckRequest";
+
+    public AliveCheckRContext Context { get; set; } = new AliveCheckRContext();
+
+    public DateTime StartTime { get; set; }
+
+    public class AliveCheckRContext {
+        public string EQPID { get; set; } = null!;
+    }
 }
+
+
