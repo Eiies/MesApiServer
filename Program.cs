@@ -11,7 +11,7 @@ using Serilog;
 using Serilog.Events;
 using System.Text;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 // 加载 .env 文件
 Env.Load();
@@ -21,7 +21,11 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
-    .ReadFrom.Configuration(builder.Configuration)
+    .WriteTo.File("Logs/log-.txt",
+        rollingInterval: RollingInterval.Day,
+        rollOnFileSizeLimit: true,
+        retainedFileCountLimit: 7,
+        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
     .CreateLogger();
 
 builder.Host.UseSerilog();
@@ -64,7 +68,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
-builder.Services.AddScoped<IMesAdapter, MesAdapter>();
+builder.Services.AddScoped<IMesAdapter, MqttMesAdapter>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 
@@ -77,13 +81,8 @@ using(IServiceScope scope = app.Services.CreateScope()) {
     try {
         db.Database.Migrate();
         Log.Information("数据库架构已更新");
-    } catch(DbUpdateException ex) {
-        Log.Fatal(ex, "数据库迁移失败：数据库更新异常");
-        // 处理数据库更新异常
-        throw;
     } catch(Exception ex) {
         Log.Fatal(ex, "数据库迁移失败：未知异常");
-        // 处理其他异常
         throw;
     }
 }

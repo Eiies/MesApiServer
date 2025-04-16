@@ -5,46 +5,58 @@ using MesApiServer.Repositories;
 
 namespace MesApiServer.Services;
 
-public class DeviceService(
-        IDeviceRepository deviceRepository,
-        IMesAdapter mesAdapter
-    ) :IDeviceService {
+public class DeviceService(IDeviceRepository deviceRepository, IMesAdapter mesAdapter, ILogger<DeviceService> logger) :IDeviceService {
 
-    public void HandleAliveCheck(AliveCheckRequest request) {
-        var eqpID = request.Context.EQPID.Trim().ToUpperInvariant(); // 处理 EQPID 字段
-        var entity = new Device {
-            DeviceId = eqpID,
-            LastHeartbeat = request.StartTime,
+    public void HandleAliveCheck(AliveCheckRequest r) {
+        // 校验和标准化
+        if(string.IsNullOrWhiteSpace(r.Content.EQPID))
+            throw new ArgumentException("EQPID 不能为空");
+        if(string.IsNullOrWhiteSpace(r.DateTime) || !DateTime.TryParse(r.DateTime, out _))
+            throw new ArgumentException("StatueTimes 不能为空");
+
+        string deviceId = r.Content.EQPID.Trim().ToUpperInvariant();
+
+        // 构造 Device 实体并保存心跳（使用传入的 StatueTimes 转换为 DateTime，可根据具体格式转换）
+        if(!DateTime.TryParse(r.DateTime, out DateTime heartbeatTime)) {
+            heartbeatTime = DateTime.UtcNow;
+        }
+        var device = new Device {
+            DeviceId = deviceId,
+            LastHeartbeat = heartbeatTime
         };
-        deviceRepository.SaveHeartbeat(entity);
-        mesAdapter.SendAliveNotification(request);
+
+        deviceRepository.SaveHeartbeat(device);
+
+        // 转发 MQTT 消息给 MES（调用适配器）
+        mesAdapter.SendAliveNotification(new AliveCheckRequest {
+            From = r.From,
+            DateTime = r.DateTime,
+            Content = new AliveCheckRequest.AliveCheckContext { EQPID = deviceId }
+        });
     }
 
-    public void HandleTrackIn(TrackInRequest request) {
-        if(string.IsNullOrWhiteSpace(request.Content.EQPID) || string.IsNullOrWhiteSpace(request.Content.LotID))
-            throw new ArgumentException("EQPID 和 LotID 是必填项");
+    public void HandleTrackIn(TrackInRequest r) {
+        if(string.IsNullOrWhiteSpace(r.Content.EQPID))
+            throw new ArgumentException("EQPID 不能为空");
+        // 标准化设备编号
+        r.Content.EQPID = r.Content.EQPID.Trim().ToUpperInvariant();
 
-        request.Content.EQPID = request.Content.EQPID.Trim().ToUpperInvariant();
-        deviceRepository.SaveTrackIn(request);
-        mesAdapter.SendMessage($"设备 {request.Content.EQPID} 入库产品 {request.Content.LotID}");
+        deviceRepository.SaveTrackIn(r);
+        mesAdapter.SendMessage($"设备 {r.Content.EQPID} 批次 {r.Content.LotID}，操作员：{r.Content.EmployeeID}，时间：{r.DateTime}");
     }
 
-    public void HandleEQPConfirm(EQP2DConfirmRequest request) {
-        if(string.IsNullOrWhiteSpace(request.DeviceId) || string.IsNullOrWhiteSpace(request.Barcode))
-            throw new ArgumentException("DeviceId 和 Barcode 是必填项");
+    public void HandleEQPConfirm(EQP2DConfirmRequest r) {
+        r.Content.EQPID = r.Content.EQPID.Trim().ToUpperInvariant();
 
-        request.DeviceId = request.DeviceId.Trim().ToUpperInvariant();
-        deviceRepository.SaveEQPConfirm(request);
-        mesAdapter.SendMessage($"设备 {request.DeviceId} 扫描确认条码 {request.Barcode}，时间：{request.ScanTime}");
+        deviceRepository.SaveEQPConfirm(r);
+        mesAdapter.SendMessage($"设备 {r.Content.EQPID} 条码 {r.Content.EQP2DID}，批次：{r.Content.LotID}，时间：{r.DateTime}");
     }
 
-    public void HandleProcessEnd(ProcessEndRequest request) {
-        if(string.IsNullOrWhiteSpace(request.DeviceId))
-            throw new ArgumentException("DeviceId 是必填项");
+    public void HandleProcessEnd(ProcessEndRequest r) {
+        r.Content.EQPID = r.Content.EQPID.Trim().ToUpperInvariant();
 
-        request.DeviceId = request.DeviceId.Trim().ToUpperInvariant();
-        deviceRepository.SaveProcessEnd(request);
-        mesAdapter.SendMessage($"设备 {request.DeviceId} 完成工序，结果：{request.Result}，时间：{request.EndTime}");
+        deviceRepository.SaveProcessEnd(r);
+        mesAdapter.SendMessage($"设备 {r.Content.EQPID} 完成工序，批次：{r.Content.LotID}载具：{r.Content.CarrierID},时间：{r.DateTime}");
     }
 }
 

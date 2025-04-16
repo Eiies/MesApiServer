@@ -1,10 +1,14 @@
 ﻿namespace MesApiServer.Models;
 public class ProcessEndRequest {
-    public required string DeviceId { get; set; }
-    public required string Result { get; set; }
-    public DateTime EndTime { get; set; }
+    public string From { get; set; } = "MES";
+    public string Message { get; set; } = "ProcessEnd";
+    public string DateTime { get; set; } = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+    public EndContent Content { get; set; } = new EndContent();
 
-    public required string Operator { get; set; }
+    public class EndContent {
+        public string CarrierID { get; set; } = null!;
+        public string EQPID { get; set; } = null!;
+        public string LotID { get; set; } = null!;
+    }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

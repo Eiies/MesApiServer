@@ -1,53 +1,45 @@
 ﻿using MesApiServer.Models;
+using MQTTnet;
+using System.Text;
 using System.Text.Json;
 
 namespace MesApiServer.Adapters;
 
-public class MesAdapter(ILogger<MesAdapter> logger) :IMesAdapter {
+public class MqttMesAdapter(ILogger<MqttMesAdapter> logger) :IMesAdapter {
+    private readonly IMqttClient mqttClient = new MqttClientFactory().CreateMqttClient();
+    private readonly MqttClientOptions options = new MqttClientOptionsBuilder()
+            .WithClientId("MesApiServerClient")
+            .WithTcpServer("localhost", 1883) // MQTT Broker 地址和端口
+            .WithCleanSession()
+            .Build();
+
+    private async Task EnsureConnectedAsync() {
+        if(!mqttClient.IsConnected) {
+            var result = await mqttClient.ConnectAsync(options, CancellationToken.None);
+            logger.LogInformation("已连接到 MQTT Broker，返回码：{ResultCode}", result.ResultCode);
+        }
+    }
+
+    private async Task PublishAsync(string topic, object payload) {
+        await EnsureConnectedAsync();
+        var json = JsonSerializer.Serialize(payload);
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic(topic)
+            .WithPayload(Encoding.UTF8.GetBytes(json))
+            .WithRetainFlag(false)
+            .Build();
+
+        await mqttClient.PublishAsync(message, CancellationToken.None);
+        logger.LogInformation("已发布消息到 MQTT 主题 {Topic}：{Payload}", topic, json);
+    }
+
     public void SendAliveNotification(AliveCheckRequest request) {
-
-        var message = JsonSerializer.Serialize(new {
-            Type = "Heartbeat",
-            request.Form,
-            request.Context.EQPID
-        });
-        logger.LogDebug("[MES] 心跳通知发送：{Message}", message);
+        // 异步发布，可以不 await，但建议捕获异常
+        _ = PublishAsync("mes/alive", request);
     }
 
-    // 发送消息到MES
     public void SendMessage(string message) {
-        // TODO: 暂时使用日志记录消息，实际应用中应替换为发送到MES的逻辑
-        logger.LogDebug($"【MesAdapter】 MES: {message}");
-    }
-
-    public void SendTrackInNotification(TrackInRequest request) {
-        var message = JsonSerializer.Serialize(new {
-            Type = "TrackIn",
-            request.Content.EQPID,
-            request.Content.CarrierID,
-            request.Content.EmployeeID,
-            request.Content.LotID,
-        });
-        logger.LogInformation("[MES] 入库通知发送：{Message}", message);
-    }
-
-    public void SendEQPConfirmNotification(EQP2DConfirmRequest request) {
-        var message = JsonSerializer.Serialize(new {
-            Type = "EQP2DConfirm",
-            request.DeviceId,
-            request.Barcode,
-            request.ScanTime
-        });
-        logger.LogInformation("[MES] 2D确认通知发送：{Message}", message);
-    }
-
-    public void SendProcessEndNotification(ProcessEndRequest request) {
-        var message = JsonSerializer.Serialize(new {
-            Type = "ProcessEnd",
-            request.DeviceId,
-            request.Result,
-            request.EndTime
-        });
-        logger.LogInformation("[MES] 工序结束通知发送：{Message}", message);
+        _ = PublishAsync("mes/message", new { Text = message, Time = DateTime.UtcNow });
     }
 }
+

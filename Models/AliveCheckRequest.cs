@@ -2,13 +2,15 @@
 
 public class AliveCheckRequest {
 
-    public string Form { get; set; } = "AliveCheckRequest";
+    public string From { get; set; } = "MES";
 
-    public AliveCheckRContext Context { get; set; } = new AliveCheckRContext();
+    public string Message { get; set; } = "AliveCheckRequest";
 
-    public DateTime StartTime { get; set; }
+    public AliveCheckContext Content { get; set; } = new AliveCheckContext();
 
-    public class AliveCheckRContext {
+    public string DateTime { get; set; } = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+
+    public class AliveCheckContext {
         public string EQPID { get; set; } = null!;
     }
 }

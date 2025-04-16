@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MesApiServer.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250415114102_InitialCreate")]
+    [Migration("20250416125744_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -27,25 +27,19 @@ namespace MesApiServer.Data.Migrations
 
             modelBuilder.Entity("MesApiServer.Data.Entities.Device", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("DeviceId")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("DeviceId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(true)
-                        .HasColumnType("varchar(50)");
-
                     b.Property<DateTime>("LastHeartbeat")
                         .HasColumnType("datetime(6)");
 
-                    b.HasKey("Id");
+                    b.HasKey("DeviceId");
+
+                    b.HasIndex("DeviceId")
+                        .IsUnique();
 
                     b.ToTable("Devices");
                 });
@@ -58,21 +52,30 @@ namespace MesApiServer.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Barcode")
+                    b.Property<string>("ConnectMode")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("DeviceId")
-                        .HasColumnType("int");
+                    b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
 
-                    b.Property<string>("EQPID")
+                    b.Property<string>("EQP2DID")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Operator")
+                    b.Property<string>("LotID")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Orientation")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("RotationAngle")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -83,7 +86,7 @@ namespace MesApiServer.Data.Migrations
 
                     b.HasIndex("DeviceId");
 
-                    b.ToTable("EQPConfirm");
+                    b.ToTable("EQPConfirms");
                 });
 
             modelBuilder.Entity("MesApiServer.Data.Entities.ProcessEnd", b =>
@@ -94,24 +97,21 @@ namespace MesApiServer.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CarrierID")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("DeviceId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("EQPID")
+                    b.Property<string>("DeviceId")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Operator")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Result")
+                    b.Property<string>("LotID")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -119,7 +119,7 @@ namespace MesApiServer.Data.Migrations
 
                     b.HasIndex("DeviceId");
 
-                    b.ToTable("ProcessEnd");
+                    b.ToTable("ProcessEnds");
                 });
 
             modelBuilder.Entity("MesApiServer.Data.Entities.TrackIn", b =>
@@ -137,12 +137,9 @@ namespace MesApiServer.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("DeviceId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("EQPID")
+                    b.Property<string>("DeviceId")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("EmployeeID")
                         .IsRequired()
@@ -152,18 +149,23 @@ namespace MesApiServer.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<DateTime>("TrackTime")
+                        .HasColumnType("datetime(6)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DeviceId");
 
-                    b.ToTable("TrackIn");
+                    b.ToTable("TrackIns");
                 });
 
             modelBuilder.Entity("MesApiServer.Data.Entities.EQPConfirm", b =>
                 {
                     b.HasOne("MesApiServer.Data.Entities.Device", "Device")
-                        .WithMany()
-                        .HasForeignKey("DeviceId");
+                        .WithMany("EQPConfirms")
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Device");
                 });
@@ -171,8 +173,10 @@ namespace MesApiServer.Data.Migrations
             modelBuilder.Entity("MesApiServer.Data.Entities.ProcessEnd", b =>
                 {
                     b.HasOne("MesApiServer.Data.Entities.Device", "Device")
-                        .WithMany()
-                        .HasForeignKey("DeviceId");
+                        .WithMany("ProcessEnds")
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Device");
                 });
@@ -180,10 +184,21 @@ namespace MesApiServer.Data.Migrations
             modelBuilder.Entity("MesApiServer.Data.Entities.TrackIn", b =>
                 {
                     b.HasOne("MesApiServer.Data.Entities.Device", "Device")
-                        .WithMany()
-                        .HasForeignKey("DeviceId");
+                        .WithMany("TrackIns")
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Device");
+                });
+
+            modelBuilder.Entity("MesApiServer.Data.Entities.Device", b =>
+                {
+                    b.Navigation("EQPConfirms");
+
+                    b.Navigation("ProcessEnds");
+
+                    b.Navigation("TrackIns");
                 });
 #pragma warning restore 612, 618
         }
