@@ -41,7 +41,7 @@ Env.Load();
 
 // ==================== 日志配置 ====================
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
     .WriteTo.File("Logs/log-.txt",
@@ -92,6 +92,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<IMesAdapter, MqttMesAdapter>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
+builder.Services.AddScoped<IRecordService, RecordCsvService>();
 
 // ==================== 应用构建 ====================
 WebApplication app = builder.Build();

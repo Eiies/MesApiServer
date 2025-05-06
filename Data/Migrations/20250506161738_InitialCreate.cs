@@ -1,32 +1,68 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace MesApiServer.Data.Migrations {
+namespace ApiServer.Data.Migrations
+{
     /// <inheritdoc />
-    public partial class InitialCreate :Migration {
+    public partial class InitialCreate : Migration
+    {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder) {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
             migrationBuilder.AlterDatabase()
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Devices",
-                columns: table => new {
+                columns: table => new
+                {
                     DeviceId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     LastHeartbeat = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_Devices", x => x.DeviceId);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "RecordCsvEntities",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    QRCode = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    EngravingContent = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CategoryResult = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ANgPoints = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    BNgPoints = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Group1 = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Group2 = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Group3 = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RecordCsvEntities", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "EQPConfirms",
-                columns: table => new {
+                columns: table => new
+                {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     DeviceId = table.Column<string>(type: "varchar(255)", nullable: false)
@@ -44,7 +80,8 @@ namespace MesApiServer.Data.Migrations {
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_EQPConfirms", x => x.Id);
                     table.ForeignKey(
                         name: "FK_EQPConfirms_Devices_DeviceId",
@@ -57,7 +94,8 @@ namespace MesApiServer.Data.Migrations {
 
             migrationBuilder.CreateTable(
                 name: "ProcessEnds",
-                columns: table => new {
+                columns: table => new
+                {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     DeviceId = table.Column<string>(type: "varchar(255)", nullable: false)
@@ -69,7 +107,8 @@ namespace MesApiServer.Data.Migrations {
                     EndTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_ProcessEnds", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ProcessEnds_Devices_DeviceId",
@@ -82,7 +121,8 @@ namespace MesApiServer.Data.Migrations {
 
             migrationBuilder.CreateTable(
                 name: "TrackIns",
-                columns: table => new {
+                columns: table => new
+                {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     DeviceId = table.Column<string>(type: "varchar(255)", nullable: false)
@@ -96,13 +136,36 @@ namespace MesApiServer.Data.Migrations {
                     TrackTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
-                constraints: table => {
+                constraints: table =>
+                {
                     table.PrimaryKey("PK_TrackIns", x => x.Id);
                     table.ForeignKey(
                         name: "FK_TrackIns_Devices_DeviceId",
                         column: x => x.DeviceId,
                         principalTable: "Devices",
                         principalColumn: "DeviceId",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "RecordCsvValues",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Index = table.Column<int>(type: "int", nullable: false),
+                    Value = table.Column<decimal>(type: "decimal(10,3)", nullable: false),
+                    RecordCsvEntityId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RecordCsvValues", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RecordCsvValues_RecordCsvEntities_RecordCsvEntityId",
+                        column: x => x.RecordCsvEntityId,
+                        principalTable: "RecordCsvEntities",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -124,13 +187,25 @@ namespace MesApiServer.Data.Migrations {
                 column: "DeviceId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RecordCsvEntities_QRCode",
+                table: "RecordCsvEntities",
+                column: "QRCode",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecordCsvValues_RecordCsvEntityId",
+                table: "RecordCsvValues",
+                column: "RecordCsvEntityId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TrackIns_DeviceId",
                 table: "TrackIns",
                 column: "DeviceId");
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder) {
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
             migrationBuilder.DropTable(
                 name: "EQPConfirms");
 
@@ -138,7 +213,13 @@ namespace MesApiServer.Data.Migrations {
                 name: "ProcessEnds");
 
             migrationBuilder.DropTable(
+                name: "RecordCsvValues");
+
+            migrationBuilder.DropTable(
                 name: "TrackIns");
+
+            migrationBuilder.DropTable(
+                name: "RecordCsvEntities");
 
             migrationBuilder.DropTable(
                 name: "Devices");

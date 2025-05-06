@@ -1,7 +1,7 @@
 # MesApiServer
 
 ```txt
-MesApiServer/
+ApiServer/
 ├── Controllers/
 │   └── EquipmentController.cs		// 接口控制器层，仅负责解析请求、调用业务服务
 ├── Data/
@@ -16,7 +16,7 @@ MesApiServer/
 │   └── DeviceRepository.cs          // 数据访问实现
 ├── Adapters/
 │   └── IMesAdapter.cs               // MES系统接口适配器接口及其实现（例如 
-MesAdapter）
+Adapter）
 ├── Services/
 │   ├── IDeviceService.cs            // 业务服务接口
 │   └── DeviceService.cs             // 业务服务实现
@@ -80,6 +80,9 @@ Update-Database
 
 ```bash
 dotnet ef migrations add InitialCreate -o Data/Migrations
+
+dotnet ef migrations remove
+
 ```
 
 **更新数据库**

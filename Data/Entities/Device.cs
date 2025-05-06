@@ -3,7 +3,8 @@
 namespace ApiServer.Data.Entities {
     // 使用 DeviceId 作为主键，确保唯一性
     public class Device {
-        [Key] public string DeviceId { get; set; } = string.Empty;
+        [Key]
+        public string DeviceId { get; set; } = string.Empty;
 
         public DateTime LastHeartbeat { get; set; } = default;
 
