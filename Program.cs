@@ -1,8 +1,8 @@
+using ApiServer.Adapters;
+using ApiServer.Data;
+using ApiServer.Repositories;
+using ApiServer.Services;
 using DotNetEnv;
-using MesApiServer.Adapters;
-using MesApiServer.Data;
-using MesApiServer.Repositories;
-using MesApiServer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -11,14 +11,37 @@ using Serilog;
 using Serilog.Events;
 using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
+/*[DllImport("kernel32.dll")]
+static extern bool FreeConsole();
+FreeConsole();*/
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// ==================== CORS 配置 ====================
+builder.Services.AddCors(options => {
+    options.AddDefaultPolicy(policy => {
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
+// ==================== 自签证书 ====================
+string certPath = Path.Combine(AppContext.BaseDirectory, "Cert", "root.pfx");
+
+builder.WebHost.ConfigureKestrel(opt => {
+    opt.ListenAnyIP(5001, listenOptions => {
+        listenOptions.UseHttps(certPath, "123456");
+    });
+    opt.ListenAnyIP(5000);
+});
 
 // 加载 .env 文件
 Env.Load();
 
 // ==================== 日志配置 ====================
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
     .Enrich.FromLogContext()
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
     .WriteTo.File("Logs/log-.txt",
@@ -31,22 +54,20 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // ==================== 数据库配置 ====================
-var connectionString = $"Server={Env.GetString("MYSQL_HOST")};Port={Env.GetString("MYSQL_PORT")};Database={Env.GetString("MYSQL_DATABASE")};User={Env.GetString("MYSQL_USER")};Password={Env.GetString("MYSQL_PASSWORD")};";
+string connectionString =
+    $"Server={Env.GetString("MYSQL_HOST")};Port={Env.GetString("MYSQL_PORT")};Database={Env.GetString("MYSQL_DATABASE")};User={Env.GetString("MYSQL_USER")};Password={Env.GetString("MYSQL_PASSWORD")};";
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseMySql(
         connectionString,
         ServerVersion.AutoDetect(connectionString),
         mysql => {
-            mysql.EnableRetryOnFailure(
-                5,
-                TimeSpan.FromSeconds(30),
-                null);
+            mysql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null);
         }));
 
 // ==================== 认证配置 ====================
 IConfigurationSection jwtSettings = builder.Configuration.GetSection("Jwt");
-if(jwtSettings.Exists()) {
+if(jwtSettings.GetChildren().Any()) {
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options => {
             options.TokenValidationParameters = new TokenValidationParameters {
@@ -99,7 +120,8 @@ if(app.Environment.IsDevelopment()) {
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+app.UseCors();
+//app.UseHttpsRedirection();
 app.UseRouting();
 
 if(jwtSettings.Exists()) {

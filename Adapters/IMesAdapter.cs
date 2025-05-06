@@ -1,10 +1,10 @@
-﻿using MesApiServer.Models;
+﻿using ApiServer.Models;
 
-namespace MesApiServer.Adapters;
-public interface IMesAdapter {
-    // 发送消息到MES
-    void SendMessage(string message);
+namespace ApiServer.Adapters {
+    public interface IMesAdapter {
+        // 发送消息到MES
+        void SendMessage(string message);
 
-    void SendAliveNotification(AliveCheckRequest request);
+        void SendAliveNotification(AliveCheckRequest request);
+    }
 }
-;

@@ -1,39 +1,32 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace MesApiServer.Data.Migrations
-{
+namespace MesApiServer.Data.Migrations {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
-    {
+    public partial class InitialCreate :Migration {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
+        protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.AlterDatabase()
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Devices",
-                columns: table => new
-                {
+                columns: table => new {
                     DeviceId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     LastHeartbeat = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Devices", x => x.DeviceId);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "EQPConfirms",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     DeviceId = table.Column<string>(type: "varchar(255)", nullable: false)
@@ -51,8 +44,7 @@ namespace MesApiServer.Data.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_EQPConfirms", x => x.Id);
                     table.ForeignKey(
                         name: "FK_EQPConfirms_Devices_DeviceId",
@@ -65,8 +57,7 @@ namespace MesApiServer.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "ProcessEnds",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     DeviceId = table.Column<string>(type: "varchar(255)", nullable: false)
@@ -78,8 +69,7 @@ namespace MesApiServer.Data.Migrations
                     EndTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_ProcessEnds", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ProcessEnds_Devices_DeviceId",
@@ -92,8 +82,7 @@ namespace MesApiServer.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "TrackIns",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     DeviceId = table.Column<string>(type: "varchar(255)", nullable: false)
@@ -107,8 +96,7 @@ namespace MesApiServer.Data.Migrations
                     TrackTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_TrackIns", x => x.Id);
                     table.ForeignKey(
                         name: "FK_TrackIns_Devices_DeviceId",
@@ -142,8 +130,7 @@ namespace MesApiServer.Data.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+        protected override void Down(MigrationBuilder migrationBuilder) {
             migrationBuilder.DropTable(
                 name: "EQPConfirms");
 
