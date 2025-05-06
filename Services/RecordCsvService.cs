@@ -2,11 +2,13 @@
 using ApiServer.Data.Entities;
 using ApiServer.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace ApiServer.Services;
 
 public interface IRecordService {
     Task SaveRecordAsync(RecordCsvDto dto);
+    Task<RecordCsvDto?> GetRecordByQRCodeAsync(string qrCode);
 }
 
 public class RecordCsvService(AppDbContext context) :IRecordService {
@@ -67,6 +69,28 @@ public class RecordCsvService(AppDbContext context) :IRecordService {
         }
 
         await context.SaveChangesAsync();
+    }
+
+    public async Task<RecordCsvDto?> GetRecordByQRCodeAsync(string qrCode) {
+        var e = await context.RecordCsvEntities.Include(r => r.Values)
+            .FirstOrDefaultAsync(r => r.QRCode == qrCode);
+
+        if(e == null)
+            return null;
+
+        var valuesDict = e.Values.ToDictionary(v => v.Index.ToString(), v => JsonSerializer.SerializeToElement(v.Value));
+
+        return new RecordCsvDto {
+            QRCode = e.QRCode,
+            EngravingContent = e.EngravingContent,
+            CategoryResult = e.CategoryResult,
+            ANgPoints = e.ANgPoints,
+            BNgPoints = e.BNgPoints,
+            Group1 = e.Group1,
+            Group2 = e.Group2,
+            Group3 = e.Group3,
+            Values = valuesDict
+        };
     }
 }
 

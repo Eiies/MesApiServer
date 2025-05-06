@@ -1,39 +1,32 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ApiServer.Data.Migrations
-{
+namespace ApiServer.Data.Migrations {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
-    {
+    public partial class InitialCreate :Migration {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
+        protected override void Up(MigrationBuilder migrationBuilder) {
             migrationBuilder.AlterDatabase()
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Devices",
-                columns: table => new
-                {
+                columns: table => new {
                     DeviceId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     LastHeartbeat = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_Devices", x => x.DeviceId);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "RecordCsvEntities",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     QRCode = table.Column<string>(type: "varchar(255)", nullable: false)
@@ -53,16 +46,14 @@ namespace ApiServer.Data.Migrations
                     Group3 = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_RecordCsvEntities", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "EQPConfirms",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     DeviceId = table.Column<string>(type: "varchar(255)", nullable: false)
@@ -80,8 +71,7 @@ namespace ApiServer.Data.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_EQPConfirms", x => x.Id);
                     table.ForeignKey(
                         name: "FK_EQPConfirms_Devices_DeviceId",
@@ -94,8 +84,7 @@ namespace ApiServer.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "ProcessEnds",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     DeviceId = table.Column<string>(type: "varchar(255)", nullable: false)
@@ -107,8 +96,7 @@ namespace ApiServer.Data.Migrations
                     EndTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_ProcessEnds", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ProcessEnds_Devices_DeviceId",
@@ -121,8 +109,7 @@ namespace ApiServer.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "TrackIns",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     DeviceId = table.Column<string>(type: "varchar(255)", nullable: false)
@@ -136,8 +123,7 @@ namespace ApiServer.Data.Migrations
                     TrackTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_TrackIns", x => x.Id);
                     table.ForeignKey(
                         name: "FK_TrackIns_Devices_DeviceId",
@@ -150,16 +136,14 @@ namespace ApiServer.Data.Migrations
 
             migrationBuilder.CreateTable(
                 name: "RecordCsvValues",
-                columns: table => new
-                {
+                columns: table => new {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Index = table.Column<int>(type: "int", nullable: false),
                     Value = table.Column<decimal>(type: "decimal(10,3)", nullable: false),
                     RecordCsvEntityId = table.Column<int>(type: "int", nullable: false)
                 },
-                constraints: table =>
-                {
+                constraints: table => {
                     table.PrimaryKey("PK_RecordCsvValues", x => x.Id);
                     table.ForeignKey(
                         name: "FK_RecordCsvValues_RecordCsvEntities_RecordCsvEntityId",
@@ -204,8 +188,7 @@ namespace ApiServer.Data.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+        protected override void Down(MigrationBuilder migrationBuilder) {
             migrationBuilder.DropTable(
                 name: "EQPConfirms");
 
