@@ -9,6 +9,7 @@ namespace ApiServer.Data {
         public DbSet<ProcessEnd> ProcessEnds { get; set; }
         public DbSet<RecordCsvEntity> RecordCsvEntities { get; set; }
         public DbSet<RecordCsvValue> RecordCsvValues { get; set; }
+        public DbSet<RcsEntity> RcsEntities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder m) {
             base.OnModelCreating(m);

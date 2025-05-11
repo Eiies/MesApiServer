@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
+using System.Net;
 using System.Text;
 
 /*[DllImport("kernel32.dll")]
@@ -31,7 +32,7 @@ string certPath = Path.Combine(AppContext.BaseDirectory, "Cert", "root.pfx");
 
 builder.WebHost.ConfigureKestrel(opt => {
     opt.ListenAnyIP(5001, listenOptions => {
-        listenOptions.UseHttps(certPath, "123456");
+        listenOptions.UseHttps(certPath, "taili");
     });
     opt.ListenAnyIP(5000);
 });
@@ -93,6 +94,12 @@ builder.Services.AddScoped<IMesAdapter, MqttMesAdapter>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<IRecordService, RecordCsvService>();
+builder.Services.AddScoped<IAgvService, AgvService>();
+builder.Services.AddHttpClient<IRcsService, RcsService>(c => {
+    c.Timeout = TimeSpan.FromSeconds(20);
+    c.DefaultRequestHeaders.ConnectionClose = true;
+    c.DefaultRequestVersion = HttpVersion.Version11;
+});
 
 // ==================== 应用构建 ====================
 WebApplication app = builder.Build();

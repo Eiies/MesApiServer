@@ -64,7 +64,7 @@ IP.1 = 192.168.1.63
 openssl genrsa -out cert.key 2048
 
 # 生成证书（有效期 666 天）
-openssl req -x509 -new -nodes -key cert.key -sha256 -days 666 -out cert.crt -config openssl.cnf
+openssl req -x509 -new -nodes -key cert.key -sha256 -days 365 -out cert.crt -config openssl.cnf
 
 合并为 PFX
 openssl pkcs12 -export -out https.pfx -inkey cert.key -in cert.crt -password pass:123456

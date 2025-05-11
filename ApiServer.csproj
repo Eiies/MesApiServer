@@ -31,13 +31,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Logs/" />
+      <None Update="Cert\*.*">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
-
-    <ItemGroup>
-        <None Update="Cert/*.pfx">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
-
 </Project>

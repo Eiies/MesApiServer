@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiServer.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250506161738_InitialCreate")]
+    [Migration("20250508042719_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -120,6 +120,66 @@ namespace ApiServer.Data.Migrations
                     b.HasIndex("DeviceId");
 
                     b.ToTable("ProcessEnds");
+                });
+
+            modelBuilder.Entity("ApiServer.Data.Entities.RcsEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CooX")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CooY")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CurrentPositionCode")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("MapCode")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("MapDataCode")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PodCode")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PodDir")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ReqCode")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ReqTime")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("RobotCode")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("TaskCode")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("WbCode")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RcsEntities");
                 });
 
             modelBuilder.Entity("ApiServer.Data.Entities.RecordCsvEntity", b =>
